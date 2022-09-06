@@ -1,15 +1,12 @@
 import { Atom } from '../lib/atom'
 import { FlamechartFrame } from '../lib/flamechart'
 import { clamp, Rect, Vec2 } from '../lib/math'
-import { CallTreeNode, Frame, Profile, ProfileGroup } from '../lib/profile'
+import { Frame, Profile, ProfileGroup, CallTreeNode } from '../lib/profile'
 import { objectsHaveShallowEquality } from '../lib/utils'
+import { HoverNode } from '../types/types'
 
 export interface FlamechartViewState {
-  hover: {
-    node: CallTreeNode
-    event: MouseEvent
-    frame: FlamechartFrame
-  } | null
+  hover: HoverNode | null
   selectedNode: CallTreeNode | null
   logicalSpaceViewportSize: Vec2
   configSpaceViewportRect: Rect
@@ -189,7 +186,7 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
 
   setFlamechartHoveredNode(
     id: FlamechartID,
-    hover: { node: CallTreeNode; event: MouseEvent } | null,
+    hover: HoverNode | null,
   ) {
     this.updateFlamechartState(id, f => ({
       ...f,

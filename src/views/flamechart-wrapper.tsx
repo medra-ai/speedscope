@@ -1,18 +1,18 @@
-import {CallTreeNode} from '../lib/profile'
-import {StyleSheet, css} from 'aphrodite'
-import {h} from 'preact'
-import {commonStyle} from './style'
-import {Rect, AffineTransform, Vec2} from '../lib/math'
-import {FlamechartPanZoomView} from './flamechart-pan-zoom-view'
-import {noop, formatPercent} from '../lib/utils'
-import {Hovertip} from './hovertip'
-import {FlamechartViewProps} from './flamechart-view-container'
-import {withTheme} from './themes/theme'
-import {StatelessComponent} from '../lib/preact-helpers'
+import { StyleSheet, css } from 'aphrodite'
+import { h } from 'preact'
+import { commonStyle } from './style'
+import { Rect, AffineTransform, Vec2 } from '../lib/math'
+import { FlamechartPanZoomView } from './flamechart-pan-zoom-view'
+import { noop, formatPercent } from '../lib/utils'
+import { Hovertip } from './hovertip'
+import { FlamechartViewProps } from './flamechart-view-container'
+import { withTheme } from './themes/theme'
+import { StatelessComponent } from '../lib/preact-helpers'
+import { HoverNode } from '../types/types'
 
 export class FlamechartWrapper extends StatelessComponent<FlamechartViewProps> {
   private clampViewportToFlamegraph(viewportRect: Rect) {
-    const {flamechart, renderInverted} = this.props
+    const { flamechart, renderInverted } = this.props
     return flamechart.getClampedConfigSpaceViewportRect({
       configSpaceViewportRect: viewportRect,
       renderInverted,
@@ -36,9 +36,9 @@ export class FlamechartWrapper extends StatelessComponent<FlamechartViewProps> {
   }
   private renderTooltip() {
     if (!this.container) return null
-    const {hover} = this.props
+    const { hover } = this.props
     if (!hover) return null
-    const {width, height, left, top} = this.container.getBoundingClientRect()
+    const { width, height, left, top } = this.container.getBoundingClientRect()
     const offset = new Vec2(hover.event.clientX - left, hover.event.clientY - top)
     const style = getStyle(this.props.theme)
     const frame = hover.node.frame
@@ -62,10 +62,7 @@ export class FlamechartWrapper extends StatelessComponent<FlamechartViewProps> {
     this.container = (container as HTMLDivElement) || null
   }
   private setNodeHover = (
-    hover: {
-      node: CallTreeNode
-      event: MouseEvent
-    } | null,
+    hover: HoverNode | null,
   ) => {
     this.props.setNodeHover(hover)
   }

@@ -18,7 +18,7 @@ export class ProfileSearchResults {
     if (!this.matches) {
       this.matches = new Map()
       this.profile.forEachFrame(frame => {
-        const match = fuzzyMatchStrings(frame.file, this.searchQuery)
+        const match = fuzzyMatchStrings(frame.name, this.searchQuery)
         if (match == null) return
         this.matches!.set(frame, match)
       })

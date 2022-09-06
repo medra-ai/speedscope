@@ -1,8 +1,6 @@
 import { h, Fragment } from 'preact'
 import { css } from 'aphrodite'
 
-import { CallTreeNode } from '../lib/profile'
-
 import { Rect, Vec2, AffineTransform } from '../lib/math'
 import { formatPercent } from '../lib/utils'
 import { FlamechartMinimapView } from './flamechart-minimap-view'
@@ -16,6 +14,8 @@ import { ProfileSearchContext } from './search-view'
 import { FlamechartSearchView } from './flamechart-search-view'
 import { getFlamechartStyle } from './flamechart-style'
 import { StatelessComponent } from '../lib/preact-helpers'
+import { HoverNode } from '../types/types'
+import { CallTreeNode } from '../lib/profile'
 
 export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
   private getStyle() {
@@ -58,7 +58,7 @@ export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
     this.setConfigSpaceViewportRect(viewportRect)
   }
 
-  private onNodeHover = (hover: { node: CallTreeNode; event: MouseEvent } | null) => {
+  private onNodeHover = (hover: HoverNode | null) => {
     this.props.setNodeHover(hover)
   }
 

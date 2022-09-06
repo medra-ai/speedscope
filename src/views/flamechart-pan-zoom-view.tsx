@@ -17,6 +17,7 @@ import { ProfileSearchResults } from '../lib/profile-search'
 import { BatchCanvasTextRenderer, BatchCanvasRectRenderer } from '../lib/canvas-2d-batch-renderers'
 import { Color } from '../lib/color'
 import { Theme } from './themes/theme'
+import { HoverNode } from '../types/types'
 
 interface FlamechartFrameLabel {
   configSpaceBounds: Rect
@@ -50,7 +51,7 @@ export interface FlamechartPanZoomViewProps {
   selectedNode: CallTreeNode | null
   theme: Theme
 
-  onNodeHover: (hover: { node: CallTreeNode; event: MouseEvent; frame: FlamechartFrame } | null) => void
+  onNodeHover: (hover: HoverNode | null) => void
   onNodeSelect: (node: CallTreeNode | null) => void
 
   configSpaceViewportRect: Rect
@@ -674,7 +675,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
     }
 
     if (this.hoveredLabel) {
-      this.props.onNodeHover({ node: this.hoveredLabel!.node, event: ev, frame: this.hoveredLabel!.frame })
+      this.props.onNodeHover({ node: this.hoveredLabel.node, event: ev, frame: this.hoveredLabel.frame })
     } else {
       this.props.onNodeHover(null)
     }

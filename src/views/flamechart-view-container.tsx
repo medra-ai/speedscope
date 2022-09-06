@@ -19,18 +19,19 @@ import {FlamechartSearchContextProvider} from './flamechart-search-view'
 import {Theme, useTheme} from './themes/theme'
 import {FlamechartID, FlamechartViewState} from '../app-state/profile-group'
 import {profileGroupAtom} from '../app-state'
+import { HoverNode } from '../types/types'
 
 interface FlamechartSetters {
   setLogicalSpaceViewportSize: (logicalSpaceViewportSize: Vec2) => void
   setConfigSpaceViewportRect: (configSpaceViewportRect: Rect) => void
-  setNodeHover: (hover: {node: CallTreeNode; event: MouseEvent} | null) => void
+  setNodeHover: (hover: HoverNode | null) => void
   setSelectedNode: (node: CallTreeNode | null) => void
 }
 
 export function useFlamechartSetters(id: FlamechartID): FlamechartSetters {
   return {
     setNodeHover: useCallback(
-      (hover: {node: CallTreeNode; event: MouseEvent} | null) => {
+      (hover: HoverNode | null) => {
         profileGroupAtom.setFlamechartHoveredNode(id, hover)
       },
       [id],
