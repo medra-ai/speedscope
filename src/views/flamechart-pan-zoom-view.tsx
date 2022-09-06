@@ -1,26 +1,27 @@
-import {Rect, AffineTransform, Vec2, clamp} from '../lib/math'
-import {CallTreeNode} from '../lib/profile'
-import {Flamechart, FlamechartFrame} from '../lib/flamechart'
-import {CanvasContext} from '../gl/canvas-context'
-import {FlamechartRenderer} from '../gl/flamechart-renderer'
-import {Sizes, FontSize, FontFamily, commonStyle} from './style'
+import { Rect, AffineTransform, Vec2, clamp } from '../lib/math'
+import { CallTreeNode } from '../lib/profile'
+import { Flamechart, FlamechartFrame } from '../lib/flamechart'
+import { CanvasContext } from '../gl/canvas-context'
+import { FlamechartRenderer } from '../gl/flamechart-renderer'
+import { Sizes, FontSize, FontFamily, commonStyle } from './style'
 import {
   cachedMeasureTextWidth,
   ELLIPSIS,
   trimTextMid,
   remapRangesToTrimmedText,
 } from '../lib/text-utils'
-import {getFlamechartStyle} from './flamechart-style'
-import {h, Component} from 'preact'
-import {css} from 'aphrodite'
-import {ProfileSearchResults} from '../lib/profile-search'
-import {BatchCanvasTextRenderer, BatchCanvasRectRenderer} from '../lib/canvas-2d-batch-renderers'
-import {Color} from '../lib/color'
-import {Theme} from './themes/theme'
+import { getFlamechartStyle } from './flamechart-style'
+import { h, Component } from 'preact'
+import { css } from 'aphrodite'
+import { ProfileSearchResults } from '../lib/profile-search'
+import { BatchCanvasTextRenderer, BatchCanvasRectRenderer } from '../lib/canvas-2d-batch-renderers'
+import { Color } from '../lib/color'
+import { Theme } from './themes/theme'
 
 interface FlamechartFrameLabel {
   configSpaceBounds: Rect
   node: CallTreeNode
+  frame: FlamechartFrame
 }
 
 /**
@@ -49,7 +50,7 @@ export interface FlamechartPanZoomViewProps {
   selectedNode: CallTreeNode | null
   theme: Theme
 
-  onNodeHover: (hover: {node: CallTreeNode; event: MouseEvent} | null) => void
+  onNodeHover: (hover: { node: CallTreeNode; event: MouseEvent; frame: FlamechartFrame } | null) => void
   onNodeSelect: (node: CallTreeNode | null) => void
 
   configSpaceViewportRect: Rect
@@ -140,7 +141,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
 
   private resizeOverlayCanvasIfNeeded() {
     if (!this.overlayCanvas) return
-    let {width, height} = this.overlayCanvas.getBoundingClientRect()
+    let { width, height } = this.overlayCanvas.getBoundingClientRect()
     {
       /*
       We render text at a higher resolution then scale down to
@@ -196,7 +197,8 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
     const indirectlySelectedOutlineBatch = new BatchCanvasRectRenderer()
     const matchedFrameBatch = new BatchCanvasRectRenderer()
 
-    const renderFrameLabelAndChildren = (frame: FlamechartFrame, depth = 0) => {
+    const renderFrameLabelAndChildren = (frame: FlamechartFrame, depth = 0, maxDepth = 100) => {
+      if (depth > maxDepth) return;
       const width = frame.end - frame.start
       const y = this.props.renderInverted ? this.configSpaceSize().y - 1 - depth : depth
       const configSpaceBounds = new Rect(new Vec2(frame.start, y), new Vec2(width, 1))
@@ -279,13 +281,13 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
             x: physicalLabelBounds.left() + LABEL_PADDING_PX,
             y: Math.round(
               physicalLabelBounds.bottom() -
-                (physicalViewSpaceFrameHeight - physicalViewSpaceFontSize) / 2,
+              (physicalViewSpaceFrameHeight - physicalViewSpaceFontSize) / 2,
             ),
           })
         }
       }
       for (let child of frame.children) {
-        renderFrameLabelAndChildren(child, depth + 1)
+        renderFrameLabelAndChildren(child, depth + 1, maxDepth)
       }
     }
 
@@ -295,7 +297,8 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
       configToPhysical.inverseTransformVector(new Vec2(1, 0)) || new Vec2(0, 0)
     ).x
 
-    const renderSpecialFrameOutlines = (frame: FlamechartFrame, depth = 0) => {
+    const renderSpecialFrameOutlines = (frame: FlamechartFrame, depth = 0, maxDepth = 100) => {
+      if (depth < maxDepth) return;
       if (!this.props.selectedNode && this.props.searchResults == null) return
       const width = frame.end - frame.start
       const y = this.props.renderInverted ? this.configSpaceSize().y - 1 - depth : depth
@@ -333,7 +336,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
         }
       }
       for (let child of frame.children) {
-        renderSpecialFrameOutlines(child, depth + 1)
+        renderSpecialFrameOutlines(child, depth + 1, maxDepth)
       }
     }
 
@@ -429,9 +432,9 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
 
   private updateConfigSpaceViewport() {
     if (!this.container) return
-    const {logicalSpaceViewportSize} = this.props
+    const { logicalSpaceViewportSize } = this.props
     const bounds = this.container.getBoundingClientRect()
-    const {width, height} = bounds
+    const { width, height } = bounds
 
     // Still initializing: don't resize yet
     if (width < 2 || height < 2) return
@@ -636,6 +639,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
     }
     this.hoveredLabel = null
     const logicalViewSpaceMouse = new Vec2(ev.offsetX, ev.offsetY)
+
     const physicalViewSpaceMouse = this.logicalToPhysicalViewSpace().transformPosition(
       logicalViewSpaceMouse,
     )
@@ -656,6 +660,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
         this.hoveredLabel = {
           configSpaceBounds,
           node: frame.node,
+          frame,
         }
       }
 
@@ -669,7 +674,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
     }
 
     if (this.hoveredLabel) {
-      this.props.onNodeHover({node: this.hoveredLabel!.node, event: ev})
+      this.props.onNodeHover({ node: this.hoveredLabel!.node, event: ev, frame: this.hoveredLabel!.frame })
     } else {
       this.props.onNodeHover(null)
     }
@@ -718,7 +723,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
 
   onWindowKeyPress = (ev: KeyboardEvent) => {
     if (!this.container) return
-    const {width, height} = this.container.getBoundingClientRect()
+    const { width, height } = this.container.getBoundingClientRect()
 
     if (ev.key === '=' || ev.key === '+') {
       this.zoom(new Vec2(width / 2, height / 2), 0.5)

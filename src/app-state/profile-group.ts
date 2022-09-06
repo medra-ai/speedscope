@@ -1,12 +1,14 @@
-import {Atom} from '../lib/atom'
-import {clamp, Rect, Vec2} from '../lib/math'
-import {CallTreeNode, Frame, Profile, ProfileGroup} from '../lib/profile'
-import {objectsHaveShallowEquality} from '../lib/utils'
+import { Atom } from '../lib/atom'
+import { FlamechartFrame } from '../lib/flamechart'
+import { clamp, Rect, Vec2 } from '../lib/math'
+import { CallTreeNode, Frame, Profile, ProfileGroup } from '../lib/profile'
+import { objectsHaveShallowEquality } from '../lib/utils'
 
 export interface FlamechartViewState {
   hover: {
     node: CallTreeNode
     event: MouseEvent
+    frame: FlamechartFrame
   } | null
   selectedNode: CallTreeNode | null
   logicalSpaceViewportSize: Vec2
@@ -75,7 +77,7 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
         profile: p,
         chronoViewState: initialFlameChartViewState,
         leftHeavyViewState: initialFlameChartViewState,
-        sandwichViewState: {callerCallee: null},
+        sandwichViewState: { callerCallee: null },
       })),
     })
   }
@@ -93,7 +95,7 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
 
   private updateActiveProfileState(fn: (profileState: ProfileState) => ProfileState) {
     if (this.state == null) return
-    const {indexToView, profiles} = this.state
+    const { indexToView, profiles } = this.state
     this.set({
       ...this.state,
       profiles: profiles.map((p, i) => {
@@ -122,7 +124,7 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
 
     this.updateActiveSandwichViewState(sandwichViewState => {
       if (frame == null) {
-        return {callerCallee: null}
+        return { callerCallee: null }
       }
       return {
         callerCallee: {
@@ -162,9 +164,9 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
             s.callerCallee == null
               ? null
               : {
-                  ...s.callerCallee,
-                  calleeFlamegraph: fn(s.callerCallee.calleeFlamegraph),
-                },
+                ...s.callerCallee,
+                calleeFlamegraph: fn(s.callerCallee.calleeFlamegraph),
+              },
         }))
         break
       }
@@ -176,9 +178,9 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
             s.callerCallee == null
               ? null
               : {
-                  ...s.callerCallee,
-                  invertedCallerFlamegraph: fn(s.callerCallee.invertedCallerFlamegraph),
-                },
+                ...s.callerCallee,
+                invertedCallerFlamegraph: fn(s.callerCallee.invertedCallerFlamegraph),
+              },
         }))
         break
       }
@@ -187,7 +189,7 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
 
   setFlamechartHoveredNode(
     id: FlamechartID,
-    hover: {node: CallTreeNode; event: MouseEvent} | null,
+    hover: { node: CallTreeNode; event: MouseEvent } | null,
   ) {
     this.updateFlamechartState(id, f => ({
       ...f,

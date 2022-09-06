@@ -1,21 +1,21 @@
-import {h, Fragment} from 'preact'
-import {css} from 'aphrodite'
+import { h, Fragment } from 'preact'
+import { css } from 'aphrodite'
 
-import {CallTreeNode} from '../lib/profile'
+import { CallTreeNode } from '../lib/profile'
 
-import {Rect, Vec2, AffineTransform} from '../lib/math'
-import {formatPercent} from '../lib/utils'
-import {FlamechartMinimapView} from './flamechart-minimap-view'
+import { Rect, Vec2, AffineTransform } from '../lib/math'
+import { formatPercent } from '../lib/utils'
+import { FlamechartMinimapView } from './flamechart-minimap-view'
 
-import {Sizes, commonStyle} from './style'
-import {FlamechartDetailView} from './flamechart-detail-view'
-import {FlamechartPanZoomView} from './flamechart-pan-zoom-view'
-import {Hovertip} from './hovertip'
-import {FlamechartViewProps} from './flamechart-view-container'
-import {ProfileSearchContext} from './search-view'
-import {FlamechartSearchView} from './flamechart-search-view'
-import {getFlamechartStyle} from './flamechart-style'
-import {StatelessComponent} from '../lib/preact-helpers'
+import { Sizes, commonStyle } from './style'
+import { FlamechartDetailView } from './flamechart-detail-view'
+import { FlamechartPanZoomView } from './flamechart-pan-zoom-view'
+import { Hovertip } from './hovertip'
+import { FlamechartViewProps } from './flamechart-view-container'
+import { ProfileSearchContext } from './search-view'
+import { FlamechartSearchView } from './flamechart-search-view'
+import { getFlamechartStyle } from './flamechart-style'
+import { StatelessComponent } from '../lib/preact-helpers'
 
 export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
   private getStyle() {
@@ -58,7 +58,7 @@ export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
     this.setConfigSpaceViewportRect(viewportRect)
   }
 
-  private onNodeHover = (hover: {node: CallTreeNode; event: MouseEvent} | null) => {
+  private onNodeHover = (hover: { node: CallTreeNode; event: MouseEvent } | null) => {
     this.props.setNodeHover(hover)
   }
 
@@ -76,9 +76,9 @@ export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
   renderTooltip() {
     if (!this.container) return null
 
-    const {hover} = this.props
+    const { hover } = this.props
     if (!hover) return null
-    const {width, height, left, top} = this.container.getBoundingClientRect()
+    const { width, height, left, top } = this.container.getBoundingClientRect()
     const offset = new Vec2(hover.event.clientX - left, hover.event.clientY - top)
     const frame = hover.node.frame
 
@@ -89,6 +89,8 @@ export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
         <span className={css(style.hoverCount)}>
           {this.formatValue(hover.node.getTotalWeight())}
         </span>{' '}
+        {hover.frame.start / 60}
+        {hover.frame.end / 60}
         {frame.name}
         {frame.file ? (
           <div>

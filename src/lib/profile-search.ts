@@ -1,7 +1,7 @@
-import {Profile, Frame, CallTreeNode} from './profile'
-import {FuzzyMatch, fuzzyMatchStrings} from './fuzzy-find'
-import {Flamechart, FlamechartFrame} from './flamechart'
-import {Rect, Vec2} from './math'
+import { Profile, Frame, CallTreeNode } from './profile'
+import { FuzzyMatch, fuzzyMatchStrings } from './fuzzy-find'
+import { Flamechart, FlamechartFrame } from './flamechart'
+import { Rect, Vec2 } from './math'
 
 export enum FlamechartType {
   CHRONO_FLAME_CHART,
@@ -11,14 +11,14 @@ export enum FlamechartType {
 // A utility class for storing cached search results to avoid recomputation when
 // the search results & profile did not change.
 export class ProfileSearchResults {
-  constructor(readonly profile: Profile, readonly searchQuery: string) {}
+  constructor(readonly profile: Profile, readonly searchQuery: string) { }
 
   private matches: Map<Frame, FuzzyMatch> | null = null
   getMatchForFrame(frame: Frame): FuzzyMatch | null {
     if (!this.matches) {
       this.matches = new Map()
       this.profile.forEachFrame(frame => {
-        const match = fuzzyMatchStrings(frame.name, this.searchQuery)
+        const match = fuzzyMatchStrings(frame.file, this.searchQuery)
         if (match == null) return
         this.matches!.set(frame, match)
       })
@@ -38,7 +38,7 @@ interface CachedFlamechartResult {
 }
 
 export class FlamechartSearchResults {
-  constructor(readonly flamechart: Flamechart, readonly profileResults: ProfileSearchResults) {}
+  constructor(readonly flamechart: Flamechart, readonly profileResults: ProfileSearchResults) { }
 
   private matches: CachedFlamechartResult | null = null
   private getResults(): CachedFlamechartResult {
@@ -46,14 +46,14 @@ export class FlamechartSearchResults {
       const matches: FlamechartSearchMatch[] = []
       const indexForNode = new Map<CallTreeNode, number>()
       const visit = (frame: FlamechartFrame, depth: number) => {
-        const {node} = frame
+        const { node } = frame
         if (this.profileResults.getMatchForFrame(node.frame)) {
           const configSpaceBounds = new Rect(
             new Vec2(frame.start, depth),
             new Vec2(frame.end - frame.start, 1),
           )
           indexForNode.set(node, matches.length)
-          matches.push({configSpaceBounds, node})
+          matches.push({ configSpaceBounds, node })
         }
 
         frame.children.forEach(child => {
@@ -66,7 +66,7 @@ export class FlamechartSearchResults {
         layers[0].forEach(frame => visit(frame, 0))
       }
 
-      this.matches = {matches, indexForNode}
+      this.matches = { matches, indexForNode }
     }
     return this.matches
   }

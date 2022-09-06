@@ -1,4 +1,4 @@
-import {ViewMode} from '../lib/view-mode'
+import { ViewMode } from '../lib/view-mode'
 
 export interface HashParams {
   profileURL?: string
@@ -45,6 +45,7 @@ export function getHashParams(hashContents = window.location.hash): HashParams {
         }
       }
     }
+    console.log('result', result)
     return result
   } catch (e) {
     console.error(`Error when loading hash fragment.`)
