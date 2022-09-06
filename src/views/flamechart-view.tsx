@@ -89,9 +89,14 @@ export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
         <span className={css(style.hoverCount)}>
           {this.formatValue(hover.node.getTotalWeight())}
         </span>{' '}
-        {hover.frame.start / 60}
-        {hover.frame.end / 60}
         {frame.name}
+        <div>
+          Start: {hover.frame.start / 60}
+        </div>
+        <div>
+          End: {hover.frame.end / 60}
+
+        </div>
         {frame.file ? (
           <div>
             {frame.file}:{frame.line}
