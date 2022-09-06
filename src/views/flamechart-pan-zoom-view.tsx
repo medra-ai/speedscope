@@ -52,7 +52,7 @@ export interface FlamechartPanZoomViewProps {
   theme: Theme
 
   onNodeHover: (hover: HoverNode | null) => void
-  onNodeSelect: (node: CallTreeNode | null) => void
+  onNodeSelect: (node: FlamechartFrame | null, shift?: boolean) => void
 
   configSpaceViewportRect: Rect
   transformViewport: (transform: AffineTransform) => void
@@ -598,6 +598,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
   }
 
   private onClick = (ev: MouseEvent) => {
+    const shift = ev.shiftKey
     const logicalMousePos = new Vec2(ev.offsetX, ev.offsetY)
     const mouseDownPos = this.mouseDownPos
     this.mouseDownPos = null
@@ -609,7 +610,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
     }
 
     if (this.hoveredLabel) {
-      this.props.onNodeSelect(this.hoveredLabel.node)
+      this.props.onNodeSelect(this.hoveredLabel.frame, shift)
       this.renderCanvas()
     } else {
       this.props.onNodeSelect(null)

@@ -15,7 +15,7 @@ import { FlamechartSearchView } from './flamechart-search-view'
 import { getFlamechartStyle } from './flamechart-style'
 import { StatelessComponent } from '../lib/preact-helpers'
 import { HoverNode } from '../types/types'
-import { CallTreeNode } from '../lib/profile'
+import { FlamechartFrame } from '../lib/flamechart'
 
 export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
   private getStyle() {
@@ -62,8 +62,25 @@ export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
     this.props.setNodeHover(hover)
   }
 
-  onNodeClick = (node: CallTreeNode | null) => {
-    this.props.setSelectedNode(node)
+  onNodeClick = (frame: FlamechartFrame | null, shift = false) => {
+    const firstFrame = this.props.selectedFrames?.[0]
+    if (frame === null) {
+      if (shift) {
+        return
+      }
+      this.props.setSelectedNode(null)
+      this.props.setSelectedFrames(null)
+      return
+    }
+    if (firstFrame && shift) {
+      const frames = [firstFrame, frame] as const;
+      this.props.setSelectedFrames(frames)
+      console.log(frames)
+      return
+    }
+    this.props.setSelectedNode(frame.node ?? null)
+    this.props.setSelectedFrames([frame, null])
+
   }
 
   formatValue(weight: number) {
@@ -151,6 +168,7 @@ export class FlamechartView extends StatelessComponent<FlamechartViewProps> {
         {this.renderTooltip()}
         {this.props.selectedNode && (
           <FlamechartDetailView
+            selectedFrames={this.props.selectedFrames}
             flamechart={this.props.flamechart}
             getCSSColorForFrame={this.props.getCSSColorForFrame}
             selectedNode={this.props.selectedNode}

@@ -1,10 +1,10 @@
-import {h} from 'preact'
-import {CanvasContext} from '../gl/canvas-context'
-import {Flamechart} from '../lib/flamechart'
-import {FlamechartRenderer, FlamechartRendererOptions} from '../gl/flamechart-renderer'
-import {Frame, Profile, CallTreeNode} from '../lib/profile'
-import {memoizeByShallowEquality} from '../lib/utils'
-import {FlamechartView} from './flamechart-view'
+import { h } from 'preact'
+import { CanvasContext } from '../gl/canvas-context'
+import { Flamechart } from '../lib/flamechart'
+import { FlamechartRenderer, FlamechartRendererOptions } from '../gl/flamechart-renderer'
+import { Frame, Profile, CallTreeNode } from '../lib/profile'
+import { memoizeByShallowEquality } from '../lib/utils'
+import { FlamechartView } from './flamechart-view'
 import {
   getRowAtlas,
   createGetColorBucketForFrame,
@@ -12,13 +12,13 @@ import {
   createGetCSSColorForFrame,
   getFrameToColorBucket,
 } from '../app-state/getters'
-import {Vec2, Rect} from '../lib/math'
-import {memo, useCallback} from 'preact/compat'
-import {ActiveProfileState} from '../app-state/active-profile-state'
-import {FlamechartSearchContextProvider} from './flamechart-search-view'
-import {Theme, useTheme} from './themes/theme'
-import {FlamechartID, FlamechartViewState} from '../app-state/profile-group'
-import {profileGroupAtom} from '../app-state'
+import { Vec2, Rect } from '../lib/math'
+import { memo, useCallback } from 'preact/compat'
+import { ActiveProfileState } from '../app-state/active-profile-state'
+import { FlamechartSearchContextProvider } from './flamechart-search-view'
+import { Theme, useTheme } from './themes/theme'
+import { FlamechartID, FlamechartViewState } from '../app-state/profile-group'
+import { profileGroupAtom } from '../app-state'
 import { HoverNode } from '../types/types'
 
 interface FlamechartSetters {
@@ -26,6 +26,7 @@ interface FlamechartSetters {
   setConfigSpaceViewportRect: (configSpaceViewportRect: Rect) => void
   setNodeHover: (hover: HoverNode | null) => void
   setSelectedNode: (node: CallTreeNode | null) => void
+  setSelectedFrames: (frames: FlamechartViewState['selectedFrames']) => void
 }
 
 export function useFlamechartSetters(id: FlamechartID): FlamechartSetters {
@@ -51,6 +52,12 @@ export function useFlamechartSetters(id: FlamechartID): FlamechartSetters {
     setSelectedNode: useCallback(
       (selectedNode: CallTreeNode | null) => {
         profileGroupAtom.setSelectedNode(id, selectedNode)
+      },
+      [id],
+    ),
+    setSelectedFrames: useCallback(
+      (selectedFrames: FlamechartViewState['selectedFrames']) => {
+        profileGroupAtom.setSelectedFrames(id, selectedFrames)
       },
       [id],
     ),
@@ -112,17 +119,17 @@ export interface FlamechartViewContainerProps {
 }
 
 export const ChronoFlamechartView = memo((props: FlamechartViewContainerProps) => {
-  const {activeProfileState, glCanvas} = props
-  const {profile, chronoViewState} = activeProfileState
+  const { activeProfileState, glCanvas } = props
+  const { profile, chronoViewState } = activeProfileState
 
   const theme = useTheme()
 
-  const canvasContext = getCanvasContext({theme, canvas: glCanvas})
+  const canvasContext = getCanvasContext({ theme, canvas: glCanvas })
   const frameToColorBucket = getFrameToColorBucket(profile)
   const getColorBucketForFrame = createGetColorBucketForFrame(frameToColorBucket)
-  const getCSSColorForFrame = createGetCSSColorForFrame({theme, frameToColorBucket})
+  const getCSSColorForFrame = createGetCSSColorForFrame({ theme, frameToColorBucket })
 
-  const flamechart = getChronoViewFlamechart({profile, getColorBucketForFrame})
+  const flamechart = getChronoViewFlamechart({ profile, getColorBucketForFrame })
   const flamechartRenderer = getChronoViewFlamechartRenderer({
     canvasContext,
     flamechart,
@@ -172,16 +179,16 @@ export const getLeftHeavyFlamechart = memoizeByShallowEquality(
 const getLeftHeavyFlamechartRenderer = createMemoizedFlamechartRenderer()
 
 export const LeftHeavyFlamechartView = memo((ownProps: FlamechartViewContainerProps) => {
-  const {activeProfileState, glCanvas} = ownProps
+  const { activeProfileState, glCanvas } = ownProps
 
-  const {profile, leftHeavyViewState} = activeProfileState
+  const { profile, leftHeavyViewState } = activeProfileState
 
   const theme = useTheme()
 
-  const canvasContext = getCanvasContext({theme, canvas: glCanvas})
+  const canvasContext = getCanvasContext({ theme, canvas: glCanvas })
   const frameToColorBucket = getFrameToColorBucket(profile)
   const getColorBucketForFrame = createGetColorBucketForFrame(frameToColorBucket)
-  const getCSSColorForFrame = createGetCSSColorForFrame({theme, frameToColorBucket})
+  const getCSSColorForFrame = createGetCSSColorForFrame({ theme, frameToColorBucket })
 
   const flamechart = getLeftHeavyFlamechart({
     profile,

@@ -4,10 +4,11 @@ import { clamp, Rect, Vec2 } from '../lib/math'
 import { Frame, Profile, ProfileGroup, CallTreeNode } from '../lib/profile'
 import { objectsHaveShallowEquality } from '../lib/utils'
 import { HoverNode } from '../types/types'
-
+export type FlamechartFramePair = Readonly<[FlamechartFrame | null, FlamechartFrame | null]>
 export interface FlamechartViewState {
   hover: HoverNode | null
   selectedNode: CallTreeNode | null
+  selectedFrames: FlamechartFramePair | null
   logicalSpaceViewportSize: Vec2
   configSpaceViewportRect: Rect
 }
@@ -48,6 +49,7 @@ export enum FlamechartID {
 let initialFlameChartViewState: FlamechartViewState = {
   hover: null,
   selectedNode: null,
+  selectedFrames: null,
   configSpaceViewportRect: Rect.empty,
   logicalSpaceViewportSize: Vec2.zero,
 }
@@ -198,6 +200,13 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
     this.updateFlamechartState(id, f => ({
       ...f,
       selectedNode,
+    }))
+  }
+
+  setSelectedFrames(id: FlamechartID, selectedFrames: FlamechartFramePair | null) {
+    this.updateFlamechartState(id, f => ({
+      ...f,
+      selectedFrames,
     }))
   }
 
